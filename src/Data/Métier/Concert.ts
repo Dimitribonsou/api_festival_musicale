@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from './index';
+import sequelize from '../../Donnees/database';
 
 export class Concert extends Model {
   id!: number;
@@ -12,11 +12,11 @@ export class Concert extends Model {
 }
 
 Concert.init({
-  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   sceneId: { type: DataTypes.INTEGER, allowNull: false },
   artisteId: { type: DataTypes.INTEGER, allowNull: false },
   debut: { type: DataTypes.DATE, allowNull: false },
   fin: { type: DataTypes.DATE, allowNull: false },
   capaciteMax: { type: DataTypes.INTEGER, allowNull: false },
-  statut: { type: DataTypes.STRING, allowNull: false }
-}, { sequelize, modelName: 'concert' });
+  statut: { type: DataTypes.STRING, allowNull: false },
+}, { sequelize, modelName: 'concert', timestamps: false });

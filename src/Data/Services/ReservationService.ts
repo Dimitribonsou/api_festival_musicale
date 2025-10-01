@@ -1,7 +1,7 @@
-import { Concert } from '../../Data/Métier/Concert';
 import { Artiste } from '../../Data/Métier/Artiste';
 import { Scene } from '../../Data/Métier/Scene';
-import { Reservation } from '../../Data/Métier/Reservation';
+import { sequelize, Concert, Reservation } from '../../Data/Métier';
+
 
 
 export const create = async (concertId: number, userId: number, nbPlaces: number) => {

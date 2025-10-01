@@ -1,20 +1,11 @@
-import { Sequelize } from 'sequelize';
+import sequelize from '../../Donnees/database';
 import { Artiste } from './Artiste';
 import { Scene } from './Scene';
 import { Concert } from './Concert';
 import { Utilisateur } from './Utilisateur';
 import { Reservation } from './Reservation';
 
-const sequelize = new Sequelize({
-  dialect: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  database: 'DB_NAME',
-  username: 'user',
-  password: 'ChangeMeNow123',
-  logging: false
-});
-
+// Associations
 Artiste.hasMany(Concert, { foreignKey: 'artisteId' });
 Concert.belongsTo(Artiste, { foreignKey: 'artisteId' });
 

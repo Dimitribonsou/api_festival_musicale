@@ -1,16 +1,23 @@
-import type { Request, Response } from "express";
-import express from "express";
-import dotenv from "dotenv";
+import express from 'express';
+import type { Application } from 'express';
+import dotenv from 'dotenv';
+import { sequelize } from './Data/Models/models';
+import { ReservationRoutes } from './Presentation/Routes/ReservationRoutes';
 
 dotenv.config();
-const app = express();
+
+const app: Application = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-  res.status(200).json({ message: "Hello API avec festival musicale !" });
+app.use('/api', ReservationRoutes()); 
+
+app.get('/', (req, res) => {
+    res.send({ message: 'Festival API running' });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-});
+sequelize.authenticate().then(() => {
+    console.log("✅ DB connectée");
+    app.listen(PORT, () => console.log(`🚀 Serveur sur http://localhost:${PORT}`));
+}).catch(err => console.error("❌ DB error:", err));

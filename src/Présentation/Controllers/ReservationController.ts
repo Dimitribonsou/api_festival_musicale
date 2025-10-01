@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as ReservationService from '../../Données/Services/ReservationService';
-import { Utilisateur } from '../../Data/Métier/models';
+import * as ReservationService from '../../Data/Services/ReservationService';
+import { Utilisateur } from '../../Data/Métier/Utilisateur';
 
 export const createReservation = async (req: Request, res: Response) => {
     const { concertId, nbPlaces, email } = req.body;
@@ -20,7 +20,7 @@ export const createReservation = async (req: Request, res: Response) => {
             });
         }
 
-        const reservation = await ReservationService.create(concertId, user.Id, nbPlaces);
+        const reservation = await ReservationService.create(concertId, user?.id, nbPlaces);
         res.status(201).json(reservation);
     } catch (error: any) {
         res.status(error.status || 500).json({ message: error.message });

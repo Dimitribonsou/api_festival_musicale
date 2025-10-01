@@ -13,7 +13,6 @@ async function initializeDatabase() {
         const artiste1 = await Artiste.create({ nom: 'The Rockers Show', genre: 'Rock' });
         const artiste2 = await Artiste.create({ nom: 'Pop Divas Night', genre: 'Pop' });
         
-        // Utilisation du getter .Id
         const user = await Utilisateur.create({ email: 'test@public.fr', role: 'PUBLIC', hashMdp: 'hashedpassword' });
         const initialUserId = user.Id;
 
@@ -61,12 +60,10 @@ const ReservationService = {
         }
 
         const reservationsValidees = concert.getDataValue('reservations') as Reservation[] | undefined;
-        // Utilisation des getters .NbPlaces pour le calcul
         const placesDejaReservees = reservationsValidees
             ? reservationsValidees.reduce((sum, res) => sum + res.NbPlaces, 0)
             : 0;
 
-        // Utilisation du getter .CapaciteMax
         const capaciteRestante = concert.CapaciteMax - placesDejaReservees;
         
         if (nbPlaces <= 0 || nbPlaces > capaciteRestante) {
@@ -106,7 +103,6 @@ const ReservationController = (initialUserId: number) => ({
         try {
             const reservation = await ReservationService.create(idConcert, userId, places);
 
-            // Utilisation des getters dans la réponse
             return res.status(201).json({
                 message: 'Réservation effectuée avec succès.',
                 reservationId: reservation.Id,
@@ -125,7 +121,6 @@ const ReservationController = (initialUserId: number) => ({
         try {
             const concerts = await Concert.findAll({
                 include: [
-                    // Artiste et Scene n'ont pas de 'reservations', on peut les inclure normalement
                     { model: Artiste, attributes: ['nom', 'genre'] },
                     { model: Scene, attributes: ['nom'] }
                 ]
@@ -154,7 +149,6 @@ initializeDatabase().then(({ initialUserId, concert1, concert2 }) => {
     app.post('/reservations', controller.createReservation);
     app.get('/concerts', controller.listConcerts);
 
-    // Utilisation des getters dans le log de démarrage
     const c1Id = concert1.Id;
     const c1Capacite = concert1.CapaciteMax;
     const c2Id = concert2.Id;

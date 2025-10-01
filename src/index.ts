@@ -1,99 +1,142 @@
-import express, { Request, Response, Application } from 'express';
+import express, { type Request, type Response, type Application } from 'express';
 import dotenv from 'dotenv';
+import { Artiste, Scene, Concert, Utilisateur, Reservation, sequelize } from './models';
 
 dotenv.config();
 
-interface Concert {
-    id: number;
-    nom: string;
-    capaciteMax: number;
-    reservationsActuelles: number;
-}
+async function initializeDatabase() {
+    try {
+        await sequelize.authenticate();
+        await sequelize.sync({ force: true }); 
 
-interface Reservation {
-    id: string;
-    concertId: number;
-    nbPlaces: number;
-    email: string;
-    createdAt: Date;
-    statut: 'VALIDEE' | 'ANNULEE';
-}
+        const scene = await Scene.create({ nom: 'Grande Scène', capacite: 1500 });
+        const artiste1 = await Artiste.create({ nom: 'The Rockers Show', genre: 'Rock' });
+        const artiste2 = await Artiste.create({ nom: 'Pop Divas Night', genre: 'Pop' });
+        
+        // Utilisation du getter .Id
+        const user = await Utilisateur.create({ email: 'test@public.fr', role: 'PUBLIC', hashMdp: 'hashedpassword' });
+        const initialUserId = user.Id;
 
-const concertsDB: Concert[] = [
-    { id: 101, nom: "The Rockers Show", capaciteMax: 1000, reservationsActuelles: 950 },
-    { id: 102, nom: "Pop Divas Night", capaciteMax: 600, reservationsActuelles: 150 },
-    { id: 103, nom: "Jazz Club", capaciteMax: 250, reservationsActuelles: 250 },
-];
+        const concert1 = await Concert.create({
+            sceneId: scene.Id,
+            artisteId: artiste1.Id, 
+            debut: new Date(Date.now() + 86400000), 
+            fin: new Date(Date.now() + 86400000 + 3600000),
+            capaciteMax: 1000,
+            statut: 'PREVU'
+        });
+        const concert2 = await Concert.create({
+            sceneId: scene.Id,
+            artisteId: artiste2.Id,
+            debut: new Date(Date.now() + 172800000),
+            fin: new Date(Date.now() + 172800000 + 3600000),
+            capaciteMax: 600,
+            statut: 'PREVU'
+        });
 
-const reservationsDB: Reservation[] = [];
+        console.log(`Données de base insérées. Utilisateur ID: ${initialUserId}`);
+        return { initialUserId, concert1, concert2 };
 
-const ConcertRepository = {
-    findById: (id: number): Concert | undefined => {
-        return concertsDB.find(c => c.id === id);
-    },
-    updateReservations: (id: number, delta: number): void => {
-        const concert = ConcertRepository.findById(id);
-        if (concert) {
-            concert.reservationsActuelles += delta;
-        }
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation de la base de données:', error);
+        process.exit(1);
     }
-};
+}
 
 const ReservationService = {
-    create: (concertId: number, nbPlaces: number, email: string): Reservation => {
-        const concert = ConcertRepository.findById(concertId);
+    create: async (concertId: number, userId: number, nbPlaces: number): Promise<Reservation> => {
+        const concert = await Concert.findByPk(concertId, {
+            include: [{
+                model: Reservation,
+                attributes: ['nbPlaces'],
+                where: { statut: 'VALIDEE' },
+                required: false
+            }]
+        });
 
         if (!concert) {
-            throw new Error('Concert non trouvé.');
+            const error = new Error('Concert non trouvé.');
+            (error as any).status = 404;
+            throw error;
         }
 
-        const capaciteRestante = concert.capaciteMax - concert.reservationsActuelles;
+        const reservationsValidees = concert.getDataValue('reservations') as Reservation[] | undefined;
+        // Utilisation des getters .NbPlaces pour le calcul
+        const placesDejaReservees = reservationsValidees
+            ? reservationsValidees.reduce((sum, res) => sum + res.NbPlaces, 0)
+            : 0;
+
+        // Utilisation du getter .CapaciteMax
+        const capaciteRestante = concert.CapaciteMax - placesDejaReservees;
+        
         if (nbPlaces <= 0 || nbPlaces > capaciteRestante) {
             const error = new Error(`Capacité dépassée. ${capaciteRestante} places disponibles.`);
             (error as any).status = 409;
             throw error;
         }
 
-        const newReservation: Reservation = {
-            id: `RES-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        const newReservation = await Reservation.create({
             concertId,
+            userId,
             nbPlaces,
-            email,
-            createdAt: new Date(),
-            statut: 'VALIDEE'
-        };
-
-        ConcertRepository.updateReservations(concertId, nbPlaces);
-        reservationsDB.push(newReservation);
+            statut: 'VALIDEE',
+            createdAt: new Date()
+        });
         
         return newReservation;
     }
 };
 
-const ReservationController = {
-    createReservation: (req: Request, res: Response) => {
-        const { concertId, nbPlaces, email } = req.body;
-
-        if (!concertId || !nbPlaces || !email) {
-            return res.status(400).json({ message: 'Concert ID, nombre de places et email sont requis.' });
+const ReservationController = (initialUserId: number) => ({
+    createReservation: async (req: Request, res: Response) => {
+        const userId = initialUserId; 
+        const { concertId, nbPlaces } = req.body;
+        
+        if (!concertId || !nbPlaces) {
+            return res.status(400).json({ message: 'Concert ID et nombre de places sont requis.' });
         }
         
-        try {
-            const reservation = ReservationService.create(concertId, nbPlaces, email);
+        const idConcert = parseInt(concertId as string, 10);
+        const places = parseInt(nbPlaces as string, 10);
+        
+        if (isNaN(idConcert) || isNaN(places)) {
+            return res.status(400).json({ message: 'Concert ID et nombre de places doivent être des nombres.' });
+        }
 
+        try {
+            const reservation = await ReservationService.create(idConcert, userId, places);
+
+            // Utilisation des getters dans la réponse
             return res.status(201).json({
                 message: 'Réservation effectuée avec succès.',
-                reservationId: reservation.id,
-                concertId: reservation.concertId,
-                nbPlaces: reservation.nbPlaces
+                reservationId: reservation.Id,
+                concertId: reservation.ConcertId,
+                nbPlaces: reservation.NbPlaces,
+                userId: reservation.UserId
             });
 
         } catch (error: any) {
             const status = error.status || 500;
             return res.status(status).json({ message: error.message });
         }
+    },
+    
+    listConcerts: async (req: Request, res: Response) => {
+        try {
+            const concerts = await Concert.findAll({
+                include: [
+                    // Artiste et Scene n'ont pas de 'reservations', on peut les inclure normalement
+                    { model: Artiste, attributes: ['nom', 'genre'] },
+                    { model: Scene, attributes: ['nom'] }
+                ]
+            });
+            
+            return res.status(200).json(concerts);
+        } catch (error) {
+            return res.status(500).json({ message: "Erreur lors de la récupération des concerts." });
+        }
     }
-};
+});
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -101,19 +144,33 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).send({ message: "Festival API MVP - Running" });
+    res.status(200).send({ message: "Festival API MVP - Running with Sequelize" });
 });
 
-app.post('/reservations', ReservationController.createReservation);
+initializeDatabase().then(({ initialUserId, concert1, concert2 }) => {
+    
+    const controller = ReservationController(initialUserId);
+    
+    app.post('/reservations', controller.createReservation);
+    app.get('/concerts', controller.listConcerts);
 
-app.listen(PORT, () => {
-    console.log(`\n======================================================`);
-    console.log(`🚀 Serveur Express Monolithe simple démarré sur le port ${PORT}`);
-    console.log(`======================================================`);
-    console.log(`\nEndpoints de test:`);
-    console.log(`- POST http://localhost:${PORT}/reservations`);
-    console.log(`  (Body: { "concertId": 102, "nbPlaces": 50, "email": "test@public.fr" })`);
-    console.log(`\nCapacités initiales pour le test:`);
-    concertsDB.forEach(c => console.log(`- ${c.nom} (${c.id}): ${c.reservationsActuelles}/${c.capaciteMax}`));
-    console.log(`\n(Ctrl+C pour arrêter le serveur)`);
+    // Utilisation des getters dans le log de démarrage
+    const c1Id = concert1.Id;
+    const c1Capacite = concert1.CapaciteMax;
+    const c2Id = concert2.Id;
+    const c2Capacite = concert2.CapaciteMax;
+
+    app.listen(PORT, () => {
+        console.log(`\n======================================================`);
+        console.log(`🚀 Serveur Express Monolithe Sequelize démarré sur le port ${PORT}`);
+        console.log(`======================================================`);
+        console.log(`\nEndpoints de test:`);
+        console.log(`- GET http://localhost:${PORT}/concerts`);
+        console.log(`- POST http://localhost:${PORT}/reservations`);
+        console.log(`  (Body: { "concertId": ${c2Id}, "nbPlaces": 50 })`);
+        console.log(`\nCapacités initiales pour le test:`);
+        console.log(`- Concert ID ${c1Id}: ${c1Capacite} places`);
+        console.log(`- Concert ID ${c2Id}: ${c2Capacite} places`);
+        console.log(`\n(Ctrl+C pour arrêter le serveur)`);
+    });
 });

@@ -1,4 +1,8 @@
-import { Reservation, Concert, Artiste, Scene } from '../../Data/Métier/models';
+import { Concert } from '../../Data/Métier/Concert';
+import { Artiste } from '../../Data/Métier/Artiste';
+import { Scene } from '../../Data/Métier/Scene';
+import { Reservation } from '../../Data/Métier/Reservation';
+
 
 export const create = async (concertId: number, userId: number, nbPlaces: number) => {
     const concert = await Concert.findByPk(concertId, {
@@ -11,8 +15,8 @@ export const create = async (concertId: number, userId: number, nbPlaces: number
         throw error;
     }
 
-    const dejaReserve = concert.getDataValue('reservations')?.reduce((sum: number, res: Reservation) => sum + res.NbPlaces, 0) || 0;
-    const capaciteRestante = concert.CapaciteMax - dejaReserve;
+    const dejaReserve = concert.getDataValue('reservations')?.reduce((sum: number, res: Reservation) => sum + res.nbPlaces, 0) || 0;
+    const capaciteRestante = concert?.capaciteMax - dejaReserve;
 
     if (nbPlaces > capaciteRestante) {
         const error = new Error(`Capacité dépassée (${capaciteRestante} places restantes).`);

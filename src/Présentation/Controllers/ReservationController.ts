@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as ReservationService from '../../Business/Services/ReservationService';
-import { Utilisateur } from '../../Data/Models/models';
+import * as ReservationService from '../../Présentation/Services/ReservationService';
+import { Utilisateur } from '../../Data/Métier/models';
 
 export const createReservation = async (req: Request, res: Response) => {
     const { concertId, nbPlaces, email } = req.body;

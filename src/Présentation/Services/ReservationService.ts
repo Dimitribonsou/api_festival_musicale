@@ -1,4 +1,4 @@
-import { Reservation, Concert, Artiste, Scene } from '../../Data/Models/models';
+import { Reservation, Concert, Artiste, Scene } from '../../Data/Métier/models';
 
 export const create = async (concertId: number, userId: number, nbPlaces: number) => {
     const concert = await Concert.findByPk(concertId, {

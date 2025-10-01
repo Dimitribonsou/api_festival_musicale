@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Application } from 'express';
 import dotenv from 'dotenv';
-import { sequelize } from './Data/Métier/models';
+import  sequelize  from '../src/Données/database';
 import { ReservationRoutes } from './Présentation/Routes/ReservationRoutes';
 
 dotenv.config();

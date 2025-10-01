@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as ReservationService from '../../Présentation/Services/ReservationService';
+import * as ReservationService from '../../Données/Services/ReservationService';
 import { Utilisateur } from '../../Data/Métier/models';
 
 export const createReservation = async (req: Request, res: Response) => {

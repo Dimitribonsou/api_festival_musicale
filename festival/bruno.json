@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "festival",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

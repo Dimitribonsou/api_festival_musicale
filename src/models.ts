@@ -4,9 +4,9 @@ const sequelize = new Sequelize({
     dialect: 'postgres',
     host: 'localhost',
     port: 5432,
-    database: 'festival_db',
-    username: 'postgres',
-    password: 'password',
+    database: 'DB_NAME',
+    username: 'user',
+    password: 'ChangeMeNow123',
     logging: false
 });
 

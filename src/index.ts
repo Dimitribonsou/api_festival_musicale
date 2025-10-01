@@ -1,6 +1,6 @@
 import express, { type Request, type Response, type Application } from 'express';
 import dotenv from 'dotenv';
-import { Artiste, Scene, Concert, Utilisateur, Reservation, sequelize } from './models';
+import { Artiste, Scene, Concert, Utilisateur, Reservation, sequelize } from './models.ts';
 
 dotenv.config();
 

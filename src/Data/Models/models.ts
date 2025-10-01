@@ -10,7 +10,6 @@ const sequelize = new Sequelize({
     logging: false
 });
 
-// Class Artiste
 export class Artiste extends Model {
     private id!: number;
     private nom!: string;
@@ -18,7 +17,6 @@ export class Artiste extends Model {
     private bioCourte?: string | undefined;
     private liens?: string | undefined;
 
-    // Getters and Setters
     get Id() { return this.id; }
     set Id(value: number) { this.id = value; }
 
@@ -35,13 +33,11 @@ export class Artiste extends Model {
     set Liens(value: string | undefined) { this.liens = value; }
 }
 
-// Class Scene
 export class Scene extends Model {
     private id!: number;
     private nom!: string;
     private capacite!: number;
 
-    // Getters and Setters
     get Id() { return this.id; }
     set Id(value: number) { this.id = value; }
 
@@ -52,7 +48,6 @@ export class Scene extends Model {
     set Capacite(value: number) { this.capacite = value; }
 }
 
-// Class Concert
 export class Concert extends Model {
     private id!: number;
     private sceneId!: number;
@@ -62,7 +57,6 @@ export class Concert extends Model {
     private capaciteMax!: number;
     private statut!: string;
 
-    // Getters and Setters
     get Id() { return this.id; }
     set Id(value: number) { this.id = value; }
 
@@ -85,14 +79,12 @@ export class Concert extends Model {
     set Statut(value: string) { this.statut = value; }
 }
 
-// Class Utilisateur
 export class Utilisateur extends Model {
     private id!: number;
     private email!: string;
     private role!: 'PUBLIC' | 'ORGANISATEUR';
     private hashMdp!: string;
 
-    // Getters and Setters
     get Id() { return this.id; }
     set Id(value: number) { this.id = value; }
 
@@ -106,7 +98,6 @@ export class Utilisateur extends Model {
     set HashMdp(value: string) { this.hashMdp = value; }
 }
 
-// Class Reservation
 export class Reservation extends Model {
     private id!: number;
     private concertId!: number;
@@ -115,7 +106,6 @@ export class Reservation extends Model {
     private statut!: string;
     private createdAt!: Date;
 
-    // Getters and Setters
     get Id() { return this.id; }
     set Id(value: number) { this.id = value; }
 
@@ -135,7 +125,6 @@ export class Reservation extends Model {
     set CreatedAt(value: Date) { this.createdAt = value; }
 }
 
-// Methodes init pour chaque class
 Artiste.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     nom: { type: DataTypes.STRING, allowNull: false },
@@ -177,7 +166,6 @@ Reservation.init({
 }, { sequelize, modelName: 'reservation', updatedAt: false });
 
 
-// Associations entre les classes
 Artiste.hasMany(Concert, { foreignKey: 'artisteId' });
 Concert.belongsTo(Artiste, { foreignKey: 'artisteId' });
 

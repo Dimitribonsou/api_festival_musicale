@@ -1,3 +1,8 @@
 node_modules
 .env
 docker
+package.json
+nodemon.json
+package-lock.json
+tsconfig.json
+

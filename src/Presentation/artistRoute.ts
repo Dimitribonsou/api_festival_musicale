@@ -5,7 +5,7 @@ import {
     getArtistById,
     updateArtist,
     deleteArtist,
-} from "../Presentation/artistController";
+} from "../Presentation/artistController.js";
 
 const router = Router();
 

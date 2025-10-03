@@ -7,9 +7,9 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "ESNext",//nodenext
+    "module": "NodeNext",//nodenext
     "target": "ES2020",//esnext
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,// Allow `import x from 'y'` when a module doesn't have a default export.
     "types": [],
     // For nodejs:
@@ -42,5 +42,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "include":["src"]
 }

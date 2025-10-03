@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import {Artiste} from "../Metier/model";
+import {Artiste} from "../Metier/model.js";
 
 // CREATE
 export const createArtist = async (req: Request, res: Response) => {

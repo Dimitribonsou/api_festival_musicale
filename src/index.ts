@@ -2,21 +2,19 @@ import type { Request, Response } from "express";
 import express from "express";
 import dotenv from "dotenv";
 import sequelize from "./Données/database.js"; // ton instance Sequelize
-
+import artistRouter from "./Presentation/artistRoute.js";
+import programmArtisteRouter from "./Presentation/program-artiste.route.js";
+import statsRouter from "./Presentation/stats.routes.js";
 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
-
+app.use("/", artistRouter)
+app.use("/", programmArtisteRouter)
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "Hello API avec festival musicale !" });
 });
-
-
-
-
-
 
 
 // Fonction pour lancer la base + serveur
@@ -34,8 +32,8 @@ async function startServer() {
     console.log("📦 Base synchronisée avec Sequelize");
 
     // Lancer le serveur
-    app.listen(3000, () => {
-      console.log("🚀 Serveur démarré sur http://localhost:3000");
+    app.listen(5000, () => {
+      console.log("🚀 Serveur démarré sur http://localhost:5000");
     });
   } catch (error) {
     console.error("❌ Impossible de démarrer la base :", error);

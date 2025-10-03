@@ -1,5 +1,5 @@
 import { Sequelize, DataTypes, Model } from 'sequelize';
-import sequelize from '../Données/database';
+import sequelize from '../Données/database.js';
 // const sequelize = new Sequelize({
 //     dialect: 'postgres',
 //     host: 'localhost',

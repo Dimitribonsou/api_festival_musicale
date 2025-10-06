@@ -18,7 +18,6 @@ app.get("/", (req: Request, res: Response) => {
 
 
 
-
 // Fonction pour lancer la base + serveur
 async function startServer() {
   try {
